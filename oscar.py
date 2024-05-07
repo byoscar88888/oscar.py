@@ -1,14 +1,5 @@
 import cv2
-import pygame
-import numpy as np
-
-# Inicializar pygame
-pygame.init()
-
-# Establecer el tamaño de la ventana
-WIDTH, HEIGHT = 640, 480
-window = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Detección de caras")
+import matplotlib.pyplot as plt
 
 # Cargar el clasificador de detección de caras preentrenado
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -30,20 +21,14 @@ while True:
     for (x, y, w, h) in faces:
         cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
     
-    # Convertir la imagen de OpenCV a una superficie de pygame
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = np.rot90(frame)
-    frame = pygame.surfarray.make_surface(frame)
-    
     # Mostrar el frame con las caras detectadas
-    window.blit(frame, (0, 0))
-    pygame.display.update()
+    plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    plt.show()
     
     # Salir del bucle si se presiona la tecla 'q'
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q:
-                cap.release()
-                cv2.destroyAllWindows()
-                pygame.quit()
-                quit()
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Liberar la cámara y cerrar todas las ventanas abiertas
+cap.release()
+cv2.destroyAllWindows()
