@@ -21,8 +21,8 @@ while True:
     
     # Dibujar un rectángulo alrededor de cada cara detectada
     for (x,y,w,h) in faces:
-        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
-        cv2.putText(frame, 'Cara', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,255,255), 2)
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
+        cv2.putText(frame, 'Cara', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,255,0), 2)
     
     # Mostrar el contador de caras en la esquina superior izquierda
     cv2.putText(frame, f'Caras: {num_faces}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
