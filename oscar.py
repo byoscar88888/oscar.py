@@ -1,5 +1,4 @@
 import cv2
-import matplotlib.pyplot as plt
 
 # Cargar el clasificador de detección de caras preentrenado
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -22,8 +21,7 @@ while True:
         cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
     
     # Mostrar el frame con las caras detectadas
-    plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    plt.show()
+    cv2.imshow('Detección de caras', frame)
     
     # Salir del bucle si se presiona la tecla 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
