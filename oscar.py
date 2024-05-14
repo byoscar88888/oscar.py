@@ -1,39 +1,60 @@
-import cv2
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+import paho.mqtt.client as mqtt
 
-# Cargar el clasificador de detección de caras pre-entrenado
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+class ControlPanel(BoxLayout):
+    def __init__(self, **kwargs):
+        super(ControlPanel, self).__init__(**kwargs)
+        self.orientation = 'vertical'
 
-# Iniciar la cámara
-cap = cv2.VideoCapture(0)
+        self.temp_label = Label(text="Temperatura: --")
+        self.add_widget(self.temp_label)
 
-while True:
-    # Capturar el fotograma
-    ret, frame = cap.read()
-    
-    # Convertir el fotograma a escala de grises
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    
-    # Detectar caras en el fotograma
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    
-    # Contador de caras
-    num_faces = len(faces)
-    
-    # Dibujar un rectángulo alrededor de cada cara detectada
-    for (x,y,w,h) in faces:
-        cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
-        cv2.putText(frame, 'Cara', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,255,0), 2)
-    
-    # Mostrar el contador de caras en la esquina superior izquierda
-    cv2.putText(frame, f'Caras: {num_faces}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-    
-    # Mostrar el fotograma con las caras detectadas
-    cv2.imshow('Face Detection',frame)
-    
-    # Salir del bucle si se presiona la tecla 'q'
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        self.humidity_label = Label(text="Humedad: --")
+        self.add_widget(self.humidity_label)
 
-# Liberar la cámara y cerrar la ventana
-cap.release()
-cv2.destroyAllWindows()
+        self.color_label = Label(text="Color Hojas: --")
+        self.add_widget(self.color_label)
+
+        self.motor_label = Label(text="Motor Agua: --")
+        self.add_widget(self.motor_label)
+
+        self.client = mqtt.Client(protocol=mqtt.MQTTv311)
+        self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
+        self.client.on_message = self.on_message
+        self.client.connect("test.mosquitto.org", 1883, 60)
+        self.client.loop_start()
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            print("Conectado al broker")
+            self.client.subscribe([
+                ("planta/temperatura", 0),
+                ("planta/humedad", 0),
+                ("planta/color_hojas", 0),
+                ("planta/motor_agua", 0)
+            ])
+        else:
+            print(f"Error de conexión: {rc}")
+
+    def on_disconnect(self, client, userdata, rc):
+        print(f"Desconectado del broker. Código de retorno: {rc}")
+
+    def on_message(self, client, userdata, msg):
+        if msg.topic == "planta/temperatura":
+            self.temp_label.text = f"Temperatura: {msg.payload.decode()}"
+        elif msg.topic == "planta/humedad":
+            self.humidity_label.text = f"Humedad: {msg.payload.decode()}"
+        elif msg.topic == "planta/color_hojas":
+            self.color_label.text = f"Color Hojas: {msg.payload.decode()}"
+        elif msg.topic == "planta/motor_agua":
+            self.motor_label.text = f"Motor Agua: {msg.payload.decode()}"
+
+class MyApp(App):
+    def build(self):
+        return ControlPanel()
+
+if __name__ == '__main__':
+    MyApp().run()
