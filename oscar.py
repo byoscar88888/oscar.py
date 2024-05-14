@@ -24,7 +24,9 @@ client_temp.on_connect = on_connect
 client_temp.on_disconnect = on_disconnect
 
 try:
+    print("Intentando conectar al broker...")
     client_temp.connect("test.mosquitto.org", 1883, 60)
+    print("Conexión exitosa")
     client_temp.loop_forever()
 except Exception as e:
     print(f"Excepción al conectar: {e}")
