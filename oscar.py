@@ -5,7 +5,7 @@ import time
 def publish_temperature(client):
     while True:
         temperature = random.uniform(15, 30)
-        client.publish("planta/temperatura", temperature)
+        client.publish("planta/temperatura", str(temperature))
         print(f"Temperatura enviada: {temperature}")
         time.sleep(5)
 
